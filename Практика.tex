@@ -1,0 +1,206 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{indentfirst}
+\usepackage{misccorr}
+\usepackage{amsmath}
+\usepackage{float}
+\begin{document}
+	\begin{titlepage}
+		\begin{center}
+			\large
+			МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ РОССИЙСКОЙ ФЕДЕРАЦИИ
+			
+			Федеральное государственное бюджетное образовательное учреждение высшего образования
+			
+			\textbf{АДЫГЕЙСКИЙ ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ}
+			\vspace{0.25cm}
+			
+			Инженерно-физический факультет
+			
+			Кафедра автоматизированных систем обработки информации и управления
+			\vfill
+			
+			\vfill
+			
+			\textsc{Отчет по практике}\\[5mm]
+			
+			{\LARGE Обход графа в глубину и ширину. \textit}
+			\bigskip
+			
+			2 курс, группа ИВТ АСОИУ
+		\end{center}
+		\vfill
+		
+		\newlength{\ML}
+		\settowidth{\ML}{«\underline{\hspace{0.7cm}}» \underline{\hspace{2cm}}}
+		\hfill\begin{minipage}{0.5\textwidth}
+			Выполнил:\\
+			\underline{\hspace{\ML}}В.\,А.~Сапунов\\
+			«05» \,06. 2025 г.
+		\end{minipage}%
+		\bigskip
+		
+		\hfill\begin{minipage}{0.5\textwidth}
+			Руководитель:\\
+			\underline{\hspace{\ML}} С.\,В.~Теплоухов\\
+			«05» \,06. 2025 г.
+		\end{minipage}%
+		\vfill
+		
+		\begin{center}
+			Майкоп, 2025 г.
+		\end{center}
+	\end{titlepage}
+	\section{Введение}
+	\label{sec:intro}
+	% Что должно быть во введении
+	\begin{enumerate}
+		\item Вариант 8 - Обход графа в глубину и ширину.
+		\item Пример кода, решающего данную задачу
+		\item Скриншот программы
+        \item Литература и источники
+	\end{enumerate}
+	
+	
+	\section{Ход работы}
+    \label{sec:exp:code}
+ \textbf{2.1 Теория решения}
+	\begin{verbatim}
+Формальное определение графа
+Граф G = (V, E), где:
+V = {v₁, v₂, ..., vₙ } - множество вершин
+E ⊆ V × V - множество рёбер
+Матрица смежности
+Для графа с n вершинами матрица смежности A размером n×n, где:
+A[i][j] = 1, если существует ребро из vᵢ в vⱼ
+ 0, иначе
+Обход в ширину (BFS)
+Формально можно описать как последовательность множеств:
+L₀ = {s} (начальная вершина)
+Lᵢ = {v ∈ V | ∃u ∈ Lᵢ₋₁: (u,v) ∈ E} \ (∪_{k=0}^{i-1} Lₖ )
+где Lᵢ - множество вершин на расстоянии i от начальнои вершины s.
+Обход в глубину (DFS)
+2
+Рекурсивное определение:
+DFS(v):
+ посещаем v
+ для всех u ∈ Adj(v):
+ если u не посещена:
+ DFS(u)
+где Adj(v) - множество вершин, смежных с v
+\end{verbatim}
+	\label{sec:exp:code}
+    \textbf{2.2 Код приложения}
+	\begin{verbatim}
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <stack>
+
+using namespace std;
+
+void BFS(const vector<vector<int>>& graph, int startNode) {
+    int n = graph.size();
+    vector<bool> visited(n, false);
+    queue<int> q;
+
+    q.push(startNode);
+    visited[startNode] = true;
+
+    cout << "Обход BFS, начиная с узла " << startNode << ": ";
+
+    while (!q.empty()) {
+        int currentNode = q.front();
+        q.pop();
+        cout << currentNode << " ";
+
+        for (int neighbor : graph[currentNode]) {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                q.push(neighbor);
+            }
+        }
+    }
+    cout << endl;
+}
+
+void DFS_recursive(const vector<vector<int>>& graph, vector<bool>& visited, int currentNode) {
+    visited[currentNode] = true;
+    cout << currentNode << " ";
+
+    for (int neighbor : graph[currentNode]) {
+        if (!visited[neighbor]) {
+            DFS_recursive(graph, visited, neighbor);
+        }
+    }
+}
+
+void DFS_iterative(const vector<vector<int>>& graph, int startNode) {
+    int n = graph.size();
+    vector<bool> visited(n, false);
+    stack<int> s;
+
+    s.push(startNode);
+    visited[startNode] = true;
+
+    cout << "DFS (итеративный) обход, начинающийся с узла " << startNode << ": ";
+
+    while (!s.empty()) {
+        int currentNode = s.top();
+        s.pop();
+        cout << currentNode << " ";
+
+        for (auto it = graph[currentNode].rbegin(); it != graph[currentNode].rend(); ++it) {
+            if (!visited[*it]) {
+                visited[*it] = true;
+                s.push(*it);
+            }
+        }
+    }
+    cout << endl;
+}
+
+int main() {
+    setlocale(0, "ru");
+    vector<vector<int>> graph = {
+        {1, 2},     
+        {0, 3, 4},  
+        {0, 5},     
+        {1},      
+        {1},        
+        {2}       
+    };
+
+    BFS(graph, 0);
+
+    vector<bool> visited(graph.size(), false);
+    cout << "Обход DFS (рекурсивный), начинающийся с узла 0: ";
+    DFS_recursive(graph, visited, 0);
+    cout << endl;
+
+    DFS_iterative(graph, 0);
+}
+	\end{verbatim}
+    \section{Изображение кода программы}
+    \begin{verbatim}
+    Скриншот программы представлен на рисунке 1
+    \end{verbatim}
+    \section{Литература и источники}
+    \item Основные алгоритмы:
+Кормен, Т., Лейзерсон, Ч., Ривест, Р., Штайн, К. "Алгоритмы: построение и анализ". 3-е
+изд. - М.: Вильямс, 2022. (Глава 22 "Элементарные алгоритмы для работы с
+графами")
+Скиена, С. "Алгоритмы. Руководство по разработке". 2-е изд. - СПб.: БХВ-Петербург,
+2011.
+\item Теоретические основы:
+Diestel, R. "Graph Theory". 5th edition. Springer, 2017.
+Harary, F. "Graph Theory". Addison-Wesley, 1969.
+\item Оригинальные работы:
+BFS: Описан в работе Moore E.F. "The shortest path through a maze". Proceedings of the
+International Symposium on the Theory of Switching (1959)
+DFS: Впервые формально описан Тарьяном в Tarjan R.E. "Depth-first search and linear
+graph algorithms". SIAM Journal on Computing, 1972
+\section{Репозиторий: https://github.com/SapunovVladimir/Pracitce2025}
+\end{document}
